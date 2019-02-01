@@ -13,10 +13,6 @@ body.without-topbar {
     padding-right: 15px;
 }
 
-.legacy-page {
-	padding-bottom: 20px;
-}
-
 /* Set width on the form input elements since they're 100% wide by default */
 .legacy-page input,
 .legacy-page select,
@@ -103,6 +99,16 @@ body.without-topbar {
 .legacy-page .dropdown-menu li {
 	cursor: pointer;
 }
+
+.legacy-page .container > h1:first-child,
+.legacy-page .wide-container > h1:first-child,
+.legacy-page .container > h2:first-child,
+.legacy-page .wide-container > h2:first-child,
+.legacy-page .container > h3:first-child,
+.legacy-page .wide-container > h3:first-child {
+	margin-top: 0;
+}
+
 
 @media (max-width: 767px) {
 	.legacy-page h1 {

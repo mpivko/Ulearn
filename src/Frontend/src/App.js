@@ -100,7 +100,6 @@ class InternalUlearnApp extends Component {
             <BrowserRouter>
                 <ErrorBoundary>
 					{ isHeaderVisible && <Header initializing={this.state.initializing}/> }
-					{ isHeaderVisible && <div className={styles.headerContentDivider} /> }
 					<NotFoundErrorBoundary>
 						{ ! this.state.initializing && // Avoiding bug: don't show page while initializing.
 													   // Otherwise we make two GET requests sequentially.

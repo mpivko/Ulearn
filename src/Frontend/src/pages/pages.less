@@ -1,13 +1,14 @@
 @import "../variables.less";
 
-@minHeight: calc(100vh - 120px);
+@minWrapperHeight: calc(100vh - 50px);
+@minContentHeight: calc(100vh - 110px);
 @minHeightPhone: calc(100vh - 50px);
 
 .wrapper {
 	width: 100%;
 	background-color: #f2f2f2;
 	margin: 0 auto;
-	min-height: @minHeight;
+	min-height: @minWrapperHeight;
 	padding-top: 30px;
 	padding-bottom: 30px;
 
@@ -18,10 +19,12 @@
 	}
 }
 
-.contentWrapper {
+.contentWrapper,
+.wideContainerWrapper,
+.slideContainerWrapper {
 	background: #fff;
 	margin: 0 auto;
-	min-height: @minHeight;
+	min-height: @minContentHeight;
 	box-shadow: 0 0 7px 1px #ccc;
 	width: calc(@maxLaptopWidth - 40px);
 	padding: 50px 50px 30px;
@@ -44,4 +47,21 @@
 		padding: 15px;
 		margin: 0;
 	}
+}
+
+.wideContainerWrapper,
+.slideContainerWrapper {
+	width: 100%;
+	margin-left: 0;
+	margin-right: 0;
+	padding-left: 0;
+	padding-right: 0;
+
+	@media (min-width: @maxTabletWidth) {
+		padding-top: 30px;
+	}
+}
+
+.slideContainerWrapper {
+	padding-top: 0;
 }

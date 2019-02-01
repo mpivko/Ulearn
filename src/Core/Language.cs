@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Text;
 using System.Xml.Serialization;
@@ -10,30 +11,39 @@ namespace Ulearn.Core
 	public enum Language : short
 	{
 		[XmlEnum("csharp")]
+		[Display(Name = "C#")]
 		CSharp = 1,
 		
 		[XmlEnum("python2")]
+		[Display(Name = "Python 2")]
 		Python2 = 2,
 		
 		[XmlEnum("python3")]
+		[Display(Name = "Python 3")]
 		Python3 = 3,
 		
 		[XmlEnum("java")]
+		[Display(Name = "Java")]
 		Java = 4,
 		
 		[XmlEnum("javascript")]
+		[Display(Name = "JavaScript")]
 		JavaScript = 5,
 
 		[XmlEnum("html")]
+		[Display(Name = "HTML")]
 		Html = 6,
 		
 		[XmlEnum("typescript")]
+		[Display(Name = "TypeScript")]
 		TypeScript = 7,
 		
 		[XmlEnum("css")]
+		[Display(Name = "CSS")]
 		Css = 8,
 		
 		[XmlEnum("text")]
+		[Display(Name = "Text")]
 		Text = 100,
 	}
 

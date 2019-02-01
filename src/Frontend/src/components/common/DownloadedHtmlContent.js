@@ -6,6 +6,7 @@ import { saveAs } from "file-saver";
 import { connect } from "react-redux"
 import api from "../../api"
 import {getQueryStringParameter} from "../../utils";
+import {Page} from "../../pages";
 
 
 function getUrlParts(url) {
@@ -63,6 +64,7 @@ class DownloadedHtmlContent extends Component {
             loading: true,
             body: '',
 			bodyClassName: '',
+			containerType: '',
             meta: {},
             links: []
         };
@@ -159,6 +161,7 @@ class DownloadedHtmlContent extends Component {
         el.innerHTML = data;
         let head = el.getElementsByTagName('head')[0];
         let body = el.getElementsByTagName('body')[0];
+        let containerType = this._getContainerType(url, body);
 
         let links = Array.from(head.getElementsByTagName('link'));
         let titles = head.getElementsByTagName('title');
@@ -167,6 +170,7 @@ class DownloadedHtmlContent extends Component {
             loading: false,
             body: body.innerHTML,
 			bodyClassName: body.className,
+			containerType: containerType,
             links: links
         });
 
@@ -207,6 +211,16 @@ class DownloadedHtmlContent extends Component {
         DownloadedHtmlContent.removeBootstrapModalBackdrop();
     }
 
+	_getContainerType(url, body) {
+		if (body.getElementsByClassName('wide-container').length > 0 || body.getElementsByClassName('main-page').length > 0)
+			return 'wide';
+		if (body.getElementsByClassName('slide-container').length > 0)
+			return 'slide';
+		if (body.getElementsByClassName('container').length > 0)
+			return 'common';
+		return ''
+	}
+
     _getCourseIdFromUrl() {
         /* 1. Extract courseId from urls like /Course/<courseId/... */
         const pathname = window.location.pathname;
@@ -245,13 +259,15 @@ class DownloadedHtmlContent extends Component {
 
     getContent() {
         let meta = Object.assign({}, this.state.meta);
-        let links = this.state.links;
-        let bodyClassName = this.state.bodyClassName;
+        let {links, bodyClassName, containerType } = this.state;
+
         return (
-            <div className="legacy-page">
-                <Meta meta={meta} links={links} bodyClassName={bodyClassName}/>
-                <Content body={this.state.body} />
-            </div>
+        	<Page width={containerType}>
+				<div className='legacy-page'>
+					<Meta meta={meta} links={links} bodyClassName={bodyClassName}/>
+					<Content body={this.state.body} />
+				</div>
+			</Page>
         )
     }
 
@@ -326,7 +342,7 @@ class DownloadedHtmlContent extends Component {
 
     static mapStateToProps(state) {
         return {
-            // To reload page after logging out of changing current user information
+            // For reloading page after logging out or changing current user information
             account: state.account
         };
     }

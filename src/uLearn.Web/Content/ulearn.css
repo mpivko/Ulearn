@@ -259,8 +259,13 @@
 /* ReSharper restore DeclarationIsEmpty */
 /*#endregion */
 
+.legacy-page .container:not(.side-bar) {
+	padding-left: 0;
+	padding-right: 0;
+}
+
 .legacy-page .container .jumbotron {
-	margin-top: 40px;
+	margin-top: 15px;
 }
 
 .legacy-page .jumbotron-logo {
@@ -720,7 +725,7 @@
 /* ReSharper restore Html.CssClassElementsNotFound */
 
 .legacy-page .wide-container {
-	margin: 0 50px;
+	margin: 0 30px;
 }
 
 @media (max-width: 768px) {
