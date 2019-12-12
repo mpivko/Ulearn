@@ -28,7 +28,7 @@
 			<Version>1.0.0-beta000031</Version>
 		</PackageReference>
 		<PackageReference Include="Vostok.Logging.Serilog">
-			<Version>1.0.0-beta000014</Version>
+			<Version>1.0.1</Version>
 		</PackageReference>
 	</ItemGroup>
 

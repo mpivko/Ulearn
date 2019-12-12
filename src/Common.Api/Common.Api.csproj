@@ -7,6 +7,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Community.AspNetCore.ExceptionHandling.Mvc" Version="2.0.3" />
+		<PackageReference Include="Kontur.Houston.AspNetCore" Version="1.0.16" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
@@ -28,8 +29,12 @@
 		</PackageReference>
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="4.5.5" />
+		<PackageReference Include="Vostok.Logging.Abstractions" Version="1.0.4" />
+		<PackageReference Include="Vostok.Logging.Console" Version="1.0.3-pre000087" />
+		<PackageReference Include="Vostok.Logging.Context" Version="1.0.1" />
+		<PackageReference Include="Vostok.Logging.File" Version="1.0.4" />
 		<PackageReference Include="Vostok.Logging.Serilog">
-			<Version>1.0.0-beta000014</Version>
+			<Version>1.0.1</Version>
 		</PackageReference>
 
 	</ItemGroup>

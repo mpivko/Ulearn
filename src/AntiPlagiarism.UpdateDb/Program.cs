@@ -16,8 +16,8 @@ using Serilog;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
+using Ulearn.Common.Api;
 using Ulearn.Core.Configuration;
-using Vostok.Logging.Serilog.Enrichers;
 using ILogger = Serilog.ILogger;
 
 namespace AntiPlagiarism.UpdateDb

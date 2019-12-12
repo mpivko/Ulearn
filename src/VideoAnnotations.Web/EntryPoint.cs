@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Events;
+using Ulearn.Common.Api;
 using Ulearn.Core.Configuration;
 using Vostok.Hosting;
 using Vostok.Logging;
@@ -58,7 +59,7 @@ namespace Ulearn.VideoAnnotations.Web
 							);
 					}
 
-					var hostLog = new SerilogLog(loggerConfiguration.CreateLogger());
+					var hostLog = new SerilogLogAdapter(new SerilogLog(loggerConfiguration.CreateLogger()));
 					hostConfigurator.SetHostLog(hostLog);
 				})
 				.ConfigureAirlock((context, configurator) => { configurator.SetLog(context.HostingEnvironment.Log.FilterByLevel(LogLevel.Warn)); })

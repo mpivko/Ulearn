@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 using Community.AspNetCore.ExceptionHandling;
 using Community.AspNetCore.ExceptionHandling.Mvc;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Core;
 using Serilog.Events;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.Swagger;
@@ -17,15 +19,58 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Ulearn.Common.Api.Models.Responses;
 using Ulearn.Common.Api.Swagger;
 using Vostok.Commons.Extensions.UnitConvertions;
+using Vostok.Context;
 using Vostok.Hosting;
 using Vostok.Instrumentation.AspNetCore;
+using Vostok.Logging;
 using Vostok.Logging.Serilog;
-using Vostok.Logging.Serilog.Enrichers;
 using Vostok.Metrics;
-using ILogger = Serilog.ILogger;
+using LogEvent = Serilog.Events.LogEvent;
 
 namespace Ulearn.Common.Api
 {
+	public class VostokLogSink : ILogEventSink
+	{
+		private readonly ILog log;
+
+		public VostokLogSink(ILog log)
+		{
+			this.log = log;
+		}
+
+		public void Emit(LogEvent logEvent)
+		{
+			var logLevel = TranslateLevel(logEvent.Level);
+			if (!log.IsEnabledFor(logLevel))
+				return;
+			var logEvent1 = new Vostok.Logging.LogEvent(logLevel, logEvent.Exception, logEvent.MessageTemplate.Render(logEvent.Properties), new object[0]);
+			foreach (var property in logEvent.Properties)
+				logEvent1.AddPropertyIfAbsent(property.Key, property.Value);
+			log.Log(logEvent1);
+		}
+
+		private LogLevel TranslateLevel(LogEventLevel logEventLevel)
+		{
+			switch (logEventLevel)
+			{
+				case LogEventLevel.Verbose:
+					return LogLevel.Trace;
+				case LogEventLevel.Debug:
+					return LogLevel.Debug;
+				case LogEventLevel.Information:
+					return LogLevel.Info;
+				case LogEventLevel.Warning:
+					return LogLevel.Warn;
+				case LogEventLevel.Error:
+					return LogLevel.Error;
+				case LogEventLevel.Fatal:
+					return LogLevel.Fatal;
+				default:
+					throw new ArgumentOutOfRangeException(nameof (logEventLevel), logEventLevel, null);
+			}
+		}
+	}
+	
 	public class BaseApiWebApplication : AspNetCoreVostokApplication
 	{
 		protected override void OnStarted(IVostokHostingEnvironment hostingEnvironment)
@@ -33,16 +78,18 @@ namespace Ulearn.Common.Api
 			hostingEnvironment.MetricScope.SystemMetrics(1.Minutes());
 		}
 
+
 		protected override IWebHost BuildWebHost(IVostokHostingEnvironment hostingEnvironment)
 		{
 			var loggerConfiguration = new LoggerConfiguration()
 				.Enrich.With<ThreadEnricher>()
 				.Enrich.With<FlowContextEnricher>()
-				.MinimumLevel.Debug()
-				.WriteTo.Airlock(LogEventLevel.Information);
+				.MinimumLevel.Debug();
+				//.WriteTo.Airlock(LogEventLevel.Information);
+
 
 			if (hostingEnvironment.Log != null)
-				loggerConfiguration = loggerConfiguration.WriteTo.VostokLog(hostingEnvironment.Log, LogEventLevel.Information);
+				loggerConfiguration = loggerConfiguration.WriteTo.Sink(new VostokLogSink(hostingEnvironment.Log), LogEventLevel.Information);
 			var logger = loggerConfiguration.CreateLogger();
 
 			return new WebHostBuilder()
@@ -174,7 +221,7 @@ namespace Ulearn.Common.Api
 
 				/* Ensure that all exception types are handled by adding handler for generic exception at the end. */
 				options.For<Exception>()
-					.Log(lo => { lo.Level = (context, exception) => LogLevel.Error; })
+					.Log(lo => { lo.Level = (context, exception) => Microsoft.Extensions.Logging.LogLevel.Error; })
 					.Response(exception => (int)HttpStatusCode.InternalServerError, ResponseAlreadyStartedBehaviour.GoToNextHandler)
 					.ClearCacheHeaders()
 					.WithObjectResult((r, exception) => new ErrorResponse("Internal error occured"
@@ -189,6 +236,71 @@ namespace Ulearn.Common.Api
 		public virtual void ConfigureDi(IServiceCollection services, ILogger logger)
 		{
 			services.AddSingleton(logger);
+		}
+	}
+	
+	public class SerilogLogAdapter : ILog
+	{
+		private SerilogLog serilog;
+		public SerilogLogAdapter([NotNull] SerilogLog serilog)
+		{
+			this.serilog = serilog;
+		}
+
+		public void Log(Vostok.Logging.LogEvent logEvent)
+		{
+			serilog.Log(Convert(logEvent));
+		}
+
+		public bool IsEnabledFor(LogLevel level)
+		{
+			return serilog.IsEnabledFor(Convert(level));
+		}
+
+		private Vostok.Logging.Abstractions.LogEvent Convert(Vostok.Logging.LogEvent logEvent)
+		{
+			var le = new Vostok.Logging.Abstractions.LogEvent(Convert(logEvent.Level), new DateTimeOffset(DateTime.Now), logEvent.MessageTemplate, logEvent.Exception);
+			if(logEvent.Properties != null)
+				foreach (var keyValuePair in logEvent.Properties)
+					le = le.WithProperty(keyValuePair.Key, keyValuePair.Value);
+			return le;
+		}
+
+		private Vostok.Logging.Abstractions.LogLevel Convert(LogLevel level)
+		{
+			switch (level)
+			{
+				case LogLevel.Debug:
+					return Vostok.Logging.Abstractions.LogLevel.Debug;
+				case LogLevel.Error:
+					return Vostok.Logging.Abstractions.LogLevel.Error;
+				case LogLevel.Fatal:
+					return Vostok.Logging.Abstractions.LogLevel.Fatal;
+				case LogLevel.Info:
+					return Vostok.Logging.Abstractions.LogLevel.Info;
+				case LogLevel.Warn:
+					return Vostok.Logging.Abstractions.LogLevel.Warn;
+				case LogLevel.Trace:
+					return Vostok.Logging.Abstractions.LogLevel.Debug;
+			}
+			throw new ArgumentException();
+		}
+	}
+	
+	public class FlowContextEnricher : ILogEventEnricher
+	{
+		public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+		{
+			foreach (KeyValuePair<string, object> keyValuePair in FlowingContext.Properties.Current)
+				logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(keyValuePair.Key, keyValuePair.Value));
+		}
+	}
+	
+	public class ThreadEnricher : ILogEventEnricher
+	{
+		public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+		{
+			logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty("Thread",  Thread.CurrentThread.Name ?? Thread.CurrentThread.ManagedThreadId.ToString()));
 		}
 	}
 }

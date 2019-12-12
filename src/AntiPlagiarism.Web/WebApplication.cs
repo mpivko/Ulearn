@@ -4,20 +4,13 @@ using AntiPlagiarism.Web.Configuration;
 using AntiPlagiarism.Web.Database;
 using AntiPlagiarism.Web.Database.Repos;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using Serilog.Events;
 using Swashbuckle.AspNetCore.Filters;
 using Ulearn.Common.Api;
-using Vostok.Commons.Extensions.UnitConvertions;
 using Vostok.Hosting;
-using Vostok.Instrumentation.AspNetCore;
-using Vostok.Logging.Serilog;
-using Vostok.Logging.Serilog.Enrichers;
-using Vostok.Metrics;
 
 namespace AntiPlagiarism.Web
 {
