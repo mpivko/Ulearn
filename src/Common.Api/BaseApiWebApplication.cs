@@ -18,11 +18,16 @@ using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Ulearn.Common.Api.Models.Responses;
 using Ulearn.Common.Api.Swagger;
+using Vostok.Clusterclient.Topology.CC;
+using Vostok.ClusterConfig.Client;
 using Vostok.Commons.Extensions.UnitConvertions;
 using Vostok.Context;
+using Vostok.Hercules.Client;
 using Vostok.Hosting;
 using Vostok.Instrumentation.AspNetCore;
 using Vostok.Logging;
+using Vostok.Logging.Hercules;
+using Vostok.Logging.Hercules.Configuration;
 using Vostok.Logging.Serilog;
 using Vostok.Metrics;
 using LogEvent = Serilog.Events.LogEvent;
@@ -91,6 +96,22 @@ namespace Ulearn.Common.Api
 			if (hostingEnvironment.Log != null)
 				loggerConfiguration = loggerConfiguration.WriteTo.Sink(new VostokLogSink(hostingEnvironment.Log), LogEventLevel.Information);
 			var logger = loggerConfiguration.CreateLogger();
+			
+			var hostLog = new SerilogLog(logger);
+			
+			var clusterProvider = new ClusterConfigClusterProvider(
+				ClusterConfigClient.Default,
+				"topology/hercules/gate.test",
+				hostLog);
+ 
+			var settings = new HerculesSinkSettings(clusterProvider, () => "hercules_api_key")
+			{
+				MaximumMemoryConsumption = 256 * 1024 * 1024 // 256 MB
+			};
+			var herculesSink = new HerculesSink(settings, hostLog);
+				
+			var herculesLog = new HerculesLog(new HerculesLogSettings(herculesSink, logStreamName));
+			var dynamicallyConfiguredLog = new HerculesLog(() => ObtainSettings());
 
 			return new WebHostBuilder()
 				.UseKestrel()
