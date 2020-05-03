@@ -8,9 +8,12 @@ namespace CourseToolHotReloader.DirectoryWorkers
 		public bool SendFullArchive { get; set; }
 
 		[Option("login", Required = true, HelpText = "login")]
-		public string login { get; set; }
+		public string Login { get; set; }
 
-		[Option("password ", Required = true, HelpText = "password")]
-		public string password { get; set; }
+		[Option("password", Required = true, HelpText = "password")]
+		public string Password { get; set; }
+
+		[Option("courseId", Required = true, HelpText = "CourseId")]
+		public string CourseId { get; set; }
 	}
 }

@@ -40,13 +40,13 @@ namespace Ulearn.Web.Api.Controllers
 		public async Task<IActionResult> CreateCourse([FromRoute] string courseId)
 		{
 			var userId = User.Identity.GetUserId();
-			if (!await courseRolesRepo.HasUserAccessToCourseAsync(userId, courseId, CourseRoleType.CourseAdmin))
-				return BadRequest($"You dont have a Course Admin access to {courseId} course");
+			/*if (!await courseRolesRepo.HasUserAccessToCourseAsync(userId, courseId, CourseRoleType.CourseAdmin))
+				return BadRequest($"You dont have a Course Admin access to {courseId} course");*/
 			
 			var tmpCourseId = courseId + userId;
-			var tmpCourse = courseManager.FindCourse(tmpCourseId);
+			/*var tmpCourse = courseManager.FindCourse(tmpCourseId);
 			if (tmpCourse != null)
-				return BadRequest($"Your temp version of course {courseId} already exists with id {tmpCourseId}");
+				return BadRequest($"Your temp version of course {courseId} already exists with id {tmpCourseId}");*/
 			
 			var versionId = Guid.NewGuid();
 
@@ -59,7 +59,7 @@ namespace Ulearn.Web.Api.Controllers
 			await coursesRepo.MarkCourseVersionAsPublishedAsync(versionId).ConfigureAwait(false);
 			await tempCoursesRepo.AddTempCourse(tmpCourseId, userId);
 			var courseFile = courseManager.GetStagingCourseFile(tmpCourseId);
-			await coursesRepo.AddCourseFile(tmpCourseId, versionId, courseFile.ReadAllContent()).ConfigureAwait(false);
+			//await coursesRepo.AddCourseFile(tmpCourseId, versionId, courseFile.ReadAllContent()).ConfigureAwait(false);
 			await NotifyAboutPublishedCourseVersion(tmpCourseId, versionId, userId).ConfigureAwait(false);
 			return Ok($"course with id {tmpCourseId} successfully created");
 		}
@@ -79,13 +79,13 @@ namespace Ulearn.Web.Api.Controllers
 		public async Task<IActionResult> UploadCourse([FromRoute] string courseId, List<IFormFile> files)
 		{
 			var userId = User.Identity.GetUserId();
-			if (!await courseRolesRepo.HasUserAccessToCourseAsync(userId, courseId, CourseRoleType.CourseAdmin))
-				return BadRequest($"You dont have a Course Admin access to {courseId} course");
+			/*if (!await courseRolesRepo.HasUserAccessToCourseAsync(userId, courseId, CourseRoleType.CourseAdmin))
+				return BadRequest($"You dont have a Course Admin access to {courseId} course");*/
 			
 			var tmpCourseId = courseId + userId;
-			var tmpCourse = courseManager.FindCourse(tmpCourseId);
+			/*var tmpCourse = courseManager.FindCourse(tmpCourseId);
 			if (tmpCourse is null)
-				return BadRequest($"Your temp version of course {courseId} does not exists. Use create method");
+				return BadRequest($"Your temp version of course {courseId} does not exists. Use create method");*/
 			if (files.Count != 1)
 			{
 				throw new Exception();

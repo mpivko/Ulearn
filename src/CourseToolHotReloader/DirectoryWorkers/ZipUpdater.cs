@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using CourseToolHotReloader.Dtos;
 using Ionic.Zip;
 
@@ -39,7 +40,13 @@ namespace CourseToolHotReloader.DirectoryWorkers
 
 		public static MemoryStream CreateZipByFolder(string pathToFolder)
 		{
-			using var zip = new ZipFile();
+
+			/*using (var zip1 = ZipFile(zipFile.FullName, new ReadOptions { Encoding = Encoding.GetEncoding(866) }))
+			{
+			}
+			*/
+
+			using var zip = new ZipFile(Encoding.UTF8);
 			zip.AddDirectory(pathToFolder);
 
 			var ms = new MemoryStream();

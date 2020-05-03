@@ -29,7 +29,7 @@ namespace CourseToolHotReloader.UpdateQuery
 
 		public void SendFullCourse()
 		{
-			ulearnApiClient.SendFullCourse(config.Path, config.JwtToken.Token);
+			ulearnApiClient.SendFullCourse(config.Path, config.JwtToken.Token, config.CourseId);
 		}
 	}
 }

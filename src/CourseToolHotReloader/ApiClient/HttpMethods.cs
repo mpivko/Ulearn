@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -53,7 +54,7 @@ namespace CourseToolHotReloader.ApiClient
 		{
 			const string baseUrl = "http://localhost:8000";
 			var url = $"{baseUrl}/tempCourses/uploadCourse/123";
-			
+
 			using var client = new HttpClient();
 			client.DefaultRequestHeaders.Authorization =
 				new AuthenticationHeaderValue("Bearer", token);
@@ -66,23 +67,46 @@ namespace CourseToolHotReloader.ApiClient
 
 			var result = response.Content.ReadAsStringAsync().Result;
 		}
-		
-		
-		public static async Task UploadCourse(MemoryStream memoryStream, string token)
+
+
+		public static async Task<string> UploadCourse(MemoryStream memoryStream, string token, string id)
 		{
-			const string baseUrl = "http://localhost:8080";
-			var url = $"{baseUrl}/tempCourses/uploadCourse/123";
-			
+			const string baseUrl = "http://localhost:8000";
+			var url = $"{baseUrl}/tempCourses/uploadCourse/{id}";
+
 			using var client = new HttpClient();
 			client.DefaultRequestHeaders.Authorization =
 				new AuthenticationHeaderValue("Bearer", token);
 
 			var fileContent = new ByteArrayContent(memoryStream.ToArray());
-			var multiContent = new MultipartFormDataContent {{fileContent, "files", "qwe.zip"}};
+			var multiContent = new MultipartFormDataContent { { fileContent, "files", "qwe.zip" } };
 			var response = await client.PostAsync(url, multiContent);
 
-			var result = response.Content.ReadAsStringAsync().Result;
+			if (response.StatusCode != HttpStatusCode.OK)
+			{
+				Console.WriteLine($"we have error {response.Content}");
+			}
+
+			return response.Content.ReadAsStringAsync().Result;
 		}
 
+		public static async Task<string> CreateCourse(string token, string id)
+		{
+			const string baseUrl = "http://localhost:8000";
+			var url = $"{baseUrl}/tempCourses/create/{id}";
+
+			using var client = new HttpClient();
+			client.DefaultRequestHeaders.Authorization =
+				new AuthenticationHeaderValue("Bearer", token);
+
+			var response = await client.PostAsync(url, null);
+
+			if (response.StatusCode != HttpStatusCode.OK)
+			{
+				Console.WriteLine($"we have error {response.Content}");
+			}
+
+			return response.Content.ReadAsStringAsync().Result;
+		}
 	}
 }
